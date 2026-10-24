@@ -2,12 +2,21 @@ import { useEffect, useState } from 'react'
 import { Authenticator } from '@aws-amplify/ui-react'
 import '@aws-amplify/ui-react/styles.css'
 import { generateClient } from 'aws-amplify/data'
+import type { AuthUser } from 'aws-amplify/auth'
+import type { Schema } from '../amplify/data/resource'
 import './App.css'
 
-const client = generateClient()
+const client = generateClient<Schema>()
 
-function Todos({ user, signOut }) {
-  const [todos, setTodos] = useState([])
+type Todo = Schema['Todo']['type']
+
+interface TodosProps {
+  user?: AuthUser
+  signOut?: () => void
+}
+
+function Todos({ user, signOut }: TodosProps) {
+  const [todos, setTodos] = useState<Todo[]>([])
 
   useEffect(() => {
     const sub = client.models.Todo.observeQuery().subscribe({
@@ -21,7 +30,7 @@ function Todos({ user, signOut }) {
     if (content) client.models.Todo.create({ content })
   }
 
-  function deleteTodo(id) {
+  function deleteTodo(id: string) {
     client.models.Todo.delete({ id })
   }
 
